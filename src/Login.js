@@ -6,89 +6,50 @@ import { useNavigate } from 'react-router-dom';
 
 function Login() {
   const { register, handleSubmit } = useForm();
-  const [error, setError] = useState("");
-  const navigate = useNavigate(); 
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   const SubmitHandler = async (data) => {
     try {
       const response = await fetch('https://dummyjson.com/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username: data.username,
-          password: data.password,
-          expiresInMins: 30,
-        }),
+        body: JSON.stringify({ username: data.username, password: data.password, expiresInMins: 30 }),
       });
-
-      if (!response.ok) {
-        throw new Error('Authentication failed. Please check your username and password.');
-      }
-
+      if (!response.ok) throw new Error('Authentication failed. Check credentials.');
       const result = await response.json();
-      console.log("Login Result:", result);
-
-      if (result.token && result.id) { 
+      if (result.token && result.id) {
         toast.success('Login successful!');
-        localStorage.setItem('username', data.username); // Store username
-        setTimeout(() => {
-            navigate('/chatbox');
-        }, 1000);
-        
-      } else {
-        throw new Error('Authentication failed. Please check your username and password.');
-      }
+        localStorage.setItem('username', data.username);
+        setTimeout(() => navigate('/chatbox'), 1000);
+      } else throw new Error('Auth failed.');
     } catch (error) {
-      console.error('Login Error:', error);
       setError(error.message);
       toast.error(error.message);
     }
   };
 
   return (
-    <div className=" mt-12 flex items-center justify-center mb-12 ">
-      <div className="max-w-md w-full mx-auto p-8 bg-white rounded-3xl shadow-lg">
-        <h1 className="text-4xl font-bold text-center mb-8 ">Login</h1>
-        <form onSubmit={handleSubmit(SubmitHandler)}>
-          {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
-          <div className="mb-4">
-            <label className="block text-gray-700 font-bold mb-2 text-2xl" htmlFor="username">
-              Username
-            </label>
-            <input
-              {...register('username')}
-              type="text"
-              id="username"
-              className="w-full px-3 py-2 text-xl border rounded-lg focus:outline-none focus:border-blue-500"
-              placeholder="Enter your username"
-              required
-            />
+    <div className="flex items-center justify-center min-h-screen  font-sans">
+      <div className="max-w-md w-full bg-white dark:bg-gray-900 rounded-3xl shadow-xl p-12 px-14 relative">
+        <h1 className="text-4xl font-semibold mb-8 text-center text-gray-700 dark:text-gray-100">Welcome Back</h1>
+        {error && <p className="text-red-600 text-center mb-4">{error}</p>}
+        <form className="space-y-6" onSubmit={handleSubmit(SubmitHandler)}>
+          <div>
+            <label className="block text-gray-600 dark:text-gray-300 mb-2 text-lg">Username</label>
+            <input {...register('username')} placeholder="Your username" className="w-full p-4 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 transition" required />
           </div>
-          <div className="mb-6">
-            <label className="block text-gray-700 font-bold mb-2 text-2xl" htmlFor="password">
-              Password
-            </label>
-            <input
-              {...register('password')}
-              type="password"
-              id="password"
-              className="w-full px-3 py-2 text-xl border rounded-lg focus:outline-none focus:border-blue-500"
-              placeholder="Enter your password"
-              required
-            />
+          <div>
+            <label className="block text-gray-600 dark:text-gray-300 mb-2 text-lg">Password</label>
+            <input {...register('password')} type="password" placeholder="Your password" className="w-full p-4 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 transition" required />
           </div>
-          <div className="flex items-center justify-center">
-            <center><button
-              type="submit"
-              className="bg-blue-500 hover:bg-blue-700 text-white text-2xl font-bold py-2 px-4 mb-10 rounded-lg focus:outline-none focus:shadow-outline"
-            >
-              Login
-            </button>
-            <p onClick={()=>{navigate('/Chatbox')}} className=' text-center text-blue-500 text-xl'>Don't have an account ? Signup</p></center>
-          </div>
+          <button type="submit" className="w-full bg-primary hover:from-purple-600 hover:to-blue-600 text-white font-semibold py-4 rounded-xl text-xl shadow-lg hover:shadow-xl transition">Login</button>
         </form>
+        <p onClick={() => navigate('/signup')} className="mt-6 text-center text-blue-500 cursor-pointer hover:underline text-lg">
+          Don't have an account? Sign up
+        </p>
+        <ToastContainer position="top-center" autoClose={2500} hideProgressBar={false} theme="colored" />
       </div>
-      <ToastContainer />
     </div>
   );
 }
